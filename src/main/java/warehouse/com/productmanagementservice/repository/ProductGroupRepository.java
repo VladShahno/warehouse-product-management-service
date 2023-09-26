@@ -1,8 +1,10 @@
 package warehouse.com.productmanagementservice.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.stereotype.Repository;
 import warehouse.com.productmanagementservice.model.ProductGroup;
 
-public interface ProductGroupRepository extends JpaRepository<ProductGroup, Long> {
+@Repository
+public interface ProductGroupRepository extends ReactiveCrudRepository<ProductGroup, Long> {
 
 }
