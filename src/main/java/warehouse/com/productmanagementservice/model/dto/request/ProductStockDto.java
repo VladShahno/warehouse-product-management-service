@@ -1,13 +1,13 @@
 package warehouse.com.productmanagementservice.model.dto.request;
 
 import java.io.Serializable;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 
-@AllArgsConstructor
-@Getter
+@Data
+@Builder
 public class ProductStockDto implements Serializable {
 
-  private final Long id;
+  private final Long warehouseId;
   private final int quantity;
 }

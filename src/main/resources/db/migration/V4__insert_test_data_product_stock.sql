@@ -10,9 +10,8 @@ CREATE TABLE IF NOT EXISTS product_stock
 );
 
 INSERT INTO product_stock (product_id, warehouse_id, quantity)
-VALUES
-    (1, 1, 10),
-    (2, 2, 5),
-    (3, 1, 8),
-    (4, 3, 12),
-    (5, 2, 18);
+VALUES (1, 1, 10),
+       (2, 2, 5),
+       (3, 1, 8),
+       (4, 3, 12),
+       (5, 2, 18);

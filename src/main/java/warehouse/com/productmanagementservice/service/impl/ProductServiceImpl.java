@@ -1,21 +1,28 @@
 package warehouse.com.productmanagementservice.service.impl;
 
-import static net.logstash.logback.argument.StructuredArguments.kv;
-import static warehouse.com.productmanagementservice.common.Constants.Logging.NAME;
+import static warehouse.com.productmanagementservice.common.Constants.Logging.ENTITY_NOT_FOUND;
 
+import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import warehouse.com.productmanagementservice.exception.EntityNotFoundException;
 import warehouse.com.productmanagementservice.mapper.ProductMapper;
+import warehouse.com.productmanagementservice.model.Product;
+import warehouse.com.productmanagementservice.model.ProductGroup;
+import warehouse.com.productmanagementservice.model.ProductStock;
+import warehouse.com.productmanagementservice.model.Warehouse;
 import warehouse.com.productmanagementservice.model.dto.request.ProductDto;
 import warehouse.com.productmanagementservice.repository.ProductRepository;
+import warehouse.com.productmanagementservice.repository.ProductStockRepository;
+import warehouse.com.productmanagementservice.repository.WarehouseRepository;
+import warehouse.com.productmanagementservice.service.ProductGroupService;
 import warehouse.com.productmanagementservice.service.ProductService;
+import warehouse.com.productmanagementservice.service.WarehouseService;
 
 @Slf4j
 @Transactional
@@ -25,38 +32,63 @@ public class ProductServiceImpl implements ProductService {
 
   private final ProductRepository productRepository;
   private final ProductMapper productMapper;
-
+  private final ProductGroupService productGroupService;
+  private final WarehouseService warehouseService;
+  private final WarehouseRepository warehouseRepository;
+  private final ProductStockRepository productStockRepository;
 
   @Override
-  public Mono<ProductDto> createProduct(ProductDto productDto) {
-    log.debug("Request to save Product with {}", kv(NAME, productDto.getProductName()));
-    var product = productMapper.toEntity(productDto);
-    //var productGroup =
+  public Product create(ProductDto productDto) {
+    ProductGroup productGroup = productGroupService.findById(productDto.getProductGroupId());
+
+    List<Warehouse> warehouses = productDto.getWarehouseIds()
+        .stream()
+        .map(warehouseRepository::findById)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .toList();
+
+    var product = productMapper.toEntityFromRequestDto(productDto);
+    product.setProductGroup(productGroup);
+    product.setWarehouses(warehouses);
+
+    List<ProductStock> productStocks = productDto.getStockItems().stream()
+        .flatMap(productStockDto ->
+            warehouseRepository.findById(productStockDto.getWarehouseId())
+                .map(warehouse -> ProductStock.builder()
+                    .warehouse(warehouse)
+                    .product(product)
+                    .quantity(productStockDto.getQuantity())
+                    .build())
+                .stream())
+        .toList();
+
+    product.setStockItems(productStocks);
+
+    productStockRepository.saveAll(productStocks);
+
+    return productRepository.save(product);
+  }
+
+  @Override
+  public Product update(Long id, ProductDto productDto) {
 
     return null;
   }
 
   @Override
-  public Mono<ProductDto> updateProduct(Long id, ProductDto productDto) {
-    return null;
-  }
-
-  @Override
-  public Mono<ProductDto> findProductById(Long id) {
+  public Product findById(Long id) {
     return productRepository.findById(id)
-        .switchIfEmpty(Mono.error(new EntityNotFoundException()))
-        .map(productMapper::toDto);
+        .orElseThrow(() -> new EntityNotFoundException(String.format(ENTITY_NOT_FOUND, id)));
   }
 
   @Override
-  public Flux<Page<ProductDto>> getAllProducts(Pageable pageable) {
-    return productRepository.findAllBy(pageable).map(products -> products.map(
-        productMapper::toDto));
+  public Page<Product> getAll(Pageable pageable) {
+    return productRepository.findAllBy(pageable);
   }
 
-
   @Override
-  public Mono<Void> deleteProductById(Long id) {
-    return productRepository.deleteById(id);
+  public void deleteById(Long id) {
+    productRepository.deleteById(id);
   }
 }

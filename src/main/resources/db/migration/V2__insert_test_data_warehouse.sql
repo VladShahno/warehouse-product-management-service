@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS warehouse
 );
 
 INSERT INTO warehouse (warehouse_name)
-VALUES
-    ('Warehouse 1'),
-    ('Warehouse 2'),
-    ('Warehouse 3');
+VALUES ('Warehouse 1'),
+       ('Warehouse 2'),
+       ('Warehouse 3');

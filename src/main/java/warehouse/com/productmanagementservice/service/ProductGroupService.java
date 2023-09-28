@@ -1,9 +1,8 @@
 package warehouse.com.productmanagementservice.service;
 
-import reactor.core.publisher.Mono;
+import warehouse.com.productmanagementservice.model.ProductGroup;
 import warehouse.com.productmanagementservice.model.dto.request.ProductGroupDto;
 
-public interface ProductGroupService {
+public interface ProductGroupService extends CrudService<ProductGroupDto, ProductGroup> {
 
-  Mono<ProductGroupDto> findProductGroupById(Long id);
 }

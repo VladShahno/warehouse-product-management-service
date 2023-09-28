@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.io.Serializable;
@@ -22,7 +24,6 @@ import org.hibernate.Hibernate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.data.relational.core.mapping.Table;
 
 @Getter
 @Setter
@@ -42,7 +43,7 @@ public class Warehouse implements Serializable {
   @Column(name = "warehouse_name", unique = true, nullable = false)
   private String warehouseName;
 
-  @ManyToMany(mappedBy = "warehouses")
+  @ManyToMany(mappedBy = "warehouses", fetch = FetchType.EAGER)
   private List<Product> products;
 
   @Temporal(TemporalType.TIMESTAMP)

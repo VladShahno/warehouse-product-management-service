@@ -5,10 +5,9 @@ CREATE TABLE IF NOT EXISTS product_group
     created            TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated            TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT pk_product_group PRIMARY KEY (id)
-    );
+);
 
 INSERT INTO product_group (product_group_name)
-VALUES
-    ('Group 1'),
-    ('Group 2'),
-    ('Group 3');
+VALUES ('Group 1'),
+       ('Group 2'),
+       ('Group 3');
