@@ -1,10 +1,15 @@
 package warehouse.com.productmanagementservice.service.impl;
 
-import static warehouse.com.productmanagementservice.common.Constants.Logging.ENTITY_NOT_FOUND;
 
+import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_EXISTS;
+import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_NOT_FOUND;
+import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.PRODUCT;
+import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.PRODUCT_NAME;
+
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -13,9 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import warehouse.com.productmanagementservice.mapper.ProductMapper;
 import warehouse.com.productmanagementservice.model.Product;
-import warehouse.com.productmanagementservice.model.ProductGroup;
 import warehouse.com.productmanagementservice.model.ProductStock;
-import warehouse.com.productmanagementservice.model.Warehouse;
 import warehouse.com.productmanagementservice.model.dto.request.ProductDto;
 import warehouse.com.productmanagementservice.repository.ProductRepository;
 import warehouse.com.productmanagementservice.repository.ProductStockRepository;
@@ -38,10 +41,28 @@ public class ProductServiceImpl implements ProductService {
   private final ProductStockRepository productStockRepository;
 
   @Override
-  public Product create(ProductDto productDto) {
-    ProductGroup productGroup = productGroupService.findById(productDto.getProductGroupId());
+  public Product findById(Long id) {
+    return productRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException(String.format(ENTITY_NOT_FOUND, id)));
+  }
 
-    List<Warehouse> warehouses = productDto.getWarehouseIds()
+  @Override
+  public Page<Product> getAll(Pageable pageable) {
+    return productRepository.findAllBy(pageable);
+  }
+
+  @Override
+  public void deleteById(Long id) {
+    productRepository.deleteById(id);
+  }
+
+  @Override
+  public Product create(ProductDto productDto) {
+    validateCreateRequest(productDto);
+
+    var productGroup = productGroupService.findById(productDto.getProductGroupId());
+
+    var warehouses = productDto.getWarehouseIds()
         .stream()
         .map(warehouseRepository::findById)
         .filter(Optional::isPresent)
@@ -52,7 +73,7 @@ public class ProductServiceImpl implements ProductService {
     product.setProductGroup(productGroup);
     product.setWarehouses(warehouses);
 
-    List<ProductStock> productStocks = productDto.getStockItems().stream()
+    var productStocks = productDto.getStockItems().stream()
         .flatMap(productStockDto ->
             warehouseRepository.findById(productStockDto.getWarehouseId())
                 .map(warehouse -> ProductStock.builder()
@@ -72,23 +93,63 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   public Product update(Long id, ProductDto productDto) {
+    var productToUpdate = findById(id);
 
-    return null;
+    validateUpdateRequest(productToUpdate, productDto);
+
+    var updatedProduct = updateProduct(productToUpdate, productDto);
+
+    return productRepository.save(updatedProduct);
   }
 
-  @Override
-  public Product findById(Long id) {
-    return productRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException(String.format(ENTITY_NOT_FOUND, id)));
+  private void validateCreateRequest(ProductDto requestDto) {
+    var productName = requestDto.getProductName();
+    if (productRepository.existsByProductName(productName)) {
+      throw new EntityExistsException(
+          String.format(ENTITY_EXISTS, PRODUCT, PRODUCT_NAME, productName));
+    }
   }
 
-  @Override
-  public Page<Product> getAll(Pageable pageable) {
-    return productRepository.findAllBy(pageable);
+  private void validateUpdateRequest(Product productToUpdate, ProductDto requestDto) {
+    var productName = requestDto.getProductName();
+    if (productRepository.existsByProductName(productName) &&
+        !productName.equalsIgnoreCase(productToUpdate.getProductName())) {
+      throw new EntityExistsException(
+          String.format(ENTITY_EXISTS, PRODUCT, PRODUCT_NAME, productName));
+    }
   }
 
-  @Override
-  public void deleteById(Long id) {
-    productRepository.deleteById(id);
+  private Product updateProduct(Product productToUpdate, ProductDto productDto) {
+    var productGroup = productGroupService.findById(productDto.getProductGroupId());
+
+    var warehouses = productDto.getWarehouseIds()
+        .stream()
+        .map(warehouseRepository::findById)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .collect(Collectors.toList());
+
+    var productStocks = productDto.getStockItems()
+        .stream()
+        .flatMap(productStockDto -> productStockRepository.findByProduct_IdAndWarehouse_Id(
+                productStockDto.getProductId(),
+                productStockDto.getWarehouseId())
+            .map(productStock -> {
+              productStock.setQuantity(productStockDto.getQuantity());
+              return productStock;
+            })
+            .stream())
+        .collect(Collectors.toList());
+
+    productToUpdate.setProductGroup(productGroup);
+    productToUpdate.setAmountOfReserved(productDto.getAmountOfReserved());
+    productToUpdate.setWarehouses(warehouses);
+    productToUpdate.setStockItems(productStocks);
+    productToUpdate.setProductName(productDto.getProductName());
+    productToUpdate.setPurchasePrice(productDto.getPurchasePrice());
+    productToUpdate.setSalePrice(productDto.getSalePrice());
+    productToUpdate.setArticle(productDto.getArticle());
+
+    return productToUpdate;
   }
 }

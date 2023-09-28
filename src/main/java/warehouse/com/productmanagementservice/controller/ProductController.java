@@ -1,5 +1,7 @@
 package warehouse.com.productmanagementservice.controller;
 
+import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.PRODUCT_ID_IS_REQUIRED;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,7 +53,20 @@ public class ProductController {
   })
   public ProductResponseDto getProductById(
       @Parameter(description = "Target product id", example = "5")
-      @NotBlank @PathVariable Long id) {
+      @NotBlank(message = PRODUCT_ID_IS_REQUIRED) @PathVariable Long id) {
     return productMapper.toDto(productService.findById(id));
+  }
+
+  @PatchMapping("/edit/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(summary = "Endpoint allows to edit product")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully updated product")
+  })
+  public ProductResponseDto updateProduct(
+      @Parameter(description = "Target product id", example = "6")
+      @NotBlank(message = PRODUCT_ID_IS_REQUIRED) @PathVariable Long id,
+      @RequestBody @Valid ProductDto requestDto) {
+    return productMapper.toDto(productService.update(id, requestDto));
   }
 }

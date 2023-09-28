@@ -10,4 +10,6 @@ import warehouse.com.productmanagementservice.model.Product;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
   Page<Product> findAllBy(Pageable pageable);
+
+  boolean existsByProductName(String productName);
 }

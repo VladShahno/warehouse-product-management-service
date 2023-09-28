@@ -1,6 +1,7 @@
 package warehouse.com.productmanagementservice.service.impl;
 
-import static warehouse.com.productmanagementservice.common.Constants.Logging.ENTITY_NOT_FOUND;
+
+import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_NOT_FOUND;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

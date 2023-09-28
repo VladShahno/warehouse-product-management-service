@@ -8,6 +8,7 @@ import lombok.Data;
 @Builder
 public class ProductStockDto implements Serializable {
 
+  private final Long productId;
   private final Long warehouseId;
   private final int quantity;
 }
