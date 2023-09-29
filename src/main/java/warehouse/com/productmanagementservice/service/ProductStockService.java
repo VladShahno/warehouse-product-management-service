@@ -1,6 +1,6 @@
 package warehouse.com.productmanagementservice.service;
 
-import warehouse.com.productmanagementservice.model.ProductStock;
+import warehouse.com.productmanagementservice.model.entity.ProductStock;
 
 public interface ProductStockService {
 

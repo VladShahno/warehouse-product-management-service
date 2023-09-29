@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import warehouse.com.productmanagementservice.mapper.ProductGroupMapper;
-import warehouse.com.productmanagementservice.model.ProductGroup;
+import warehouse.com.productmanagementservice.model.entity.ProductGroup;
 import warehouse.com.productmanagementservice.model.dto.request.CreateProductGroupDto;
 import warehouse.com.productmanagementservice.model.dto.response.ProductGroupFullResponseDto;
 import warehouse.com.productmanagementservice.service.ProductGroupService;

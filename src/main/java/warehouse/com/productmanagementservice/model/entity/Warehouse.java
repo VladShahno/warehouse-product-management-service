@@ -1,4 +1,4 @@
-package warehouse.com.productmanagementservice.model;
+package warehouse.com.productmanagementservice.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;

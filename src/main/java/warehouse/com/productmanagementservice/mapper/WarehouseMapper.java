@@ -6,13 +6,16 @@ import org.mapstruct.MappingConstants.ComponentModel;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
-import warehouse.com.productmanagementservice.model.Warehouse;
+import warehouse.com.productmanagementservice.model.entity.Warehouse;
 import warehouse.com.productmanagementservice.model.dto.request.WarehouseDto;
+import warehouse.com.productmanagementservice.model.dto.response.WarehouseResponseDto;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = ComponentModel.SPRING)
 public interface WarehouseMapper {
 
   Warehouse toEntity(WarehouseDto warehouseDto);
+
+  WarehouseResponseDto toWarehouseResponseDto(Warehouse warehouse);
 
   WarehouseDto toDto(Warehouse warehouse);
 

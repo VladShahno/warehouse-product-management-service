@@ -6,17 +6,17 @@ import org.mapstruct.MappingConstants.ComponentModel;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
-import warehouse.com.productmanagementservice.model.entity.ProductStock;
-import warehouse.com.productmanagementservice.model.dto.request.ProductStockDto;
+import warehouse.com.productmanagementservice.model.dto.request.OrderItemDto;
+import warehouse.com.productmanagementservice.model.entity.OrderItem;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = ComponentModel.SPRING)
-public interface ProductStockMapper {
+public interface OrderItemMapper {
 
-  ProductStock toEntity(ProductStockDto productStockDto);
+  OrderItem toEntity(OrderItemDto orderItemDto);
 
-  ProductStockDto toDto(ProductStock productStock);
+  OrderItemDto toDto(OrderItem orderItem);
 
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-  ProductStock partialUpdate(
-      ProductStockDto productStockDto, @MappingTarget ProductStock productStock);
+  OrderItem partialUpdate(
+      OrderItemDto orderItemDto, @MappingTarget OrderItem orderItem);
 }

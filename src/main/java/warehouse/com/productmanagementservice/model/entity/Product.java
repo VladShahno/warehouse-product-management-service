@@ -1,22 +1,26 @@
-package warehouse.com.productmanagementservice.model;
+package warehouse.com.productmanagementservice.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,29 +31,42 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"created", "updated"}, allowGetters = true)
 @Entity
-@Table(name = "product_stock")
-public class ProductStock implements Serializable {
+@Table(name = "products")
+public class Product implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", nullable = false)
   private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "product_id")
-  private Product product;
+  @Column(name = "product_name", unique = true, nullable = false)
+  private String productName;
 
-  @ManyToOne
-  @JoinColumn(name = "warehouse_id")
-  private Warehouse warehouse;
+  @Column(name = "amount_reserved", nullable = false)
+  private Integer amountOfReserved;
 
-  private int quantity;
+  @Column(name = "purchase_price", nullable = false)
+  private BigDecimal purchasePrice;
+
+  @Column(name = "sale_price", nullable = false)
+  private BigDecimal salePrice;
+
+  @ManyToOne(optional = false, cascade = {
+      CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
+  })
+  @JsonBackReference
+  private ProductGroup productGroup;
+
+  @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  private List<ProductStock> stockItems;
+
+  @Column(name = "article", nullable = false)
+  private String article;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "created", updatable = false)
@@ -69,7 +86,7 @@ public class ProductStock implements Serializable {
     if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
       return false;
     }
-    ProductStock that = (ProductStock) o;
+    Product that = (Product) o;
     return id != null && Objects.equals(id, that.id);
   }
 

@@ -7,17 +7,17 @@ public class Constants {
 
   @UtilityClass
   public class Logging {
+
     public static final String NAME = "name";
     public static final String ID = "id";
   }
 
   @UtilityClass
   public class ProductManagementValidation {
+
     public static final String INVALID_SPECIAL_CHARACTERS_MESSAGE = "Invalid %s. Special characters are not allowed";
     public static final String SPECIAL_CHARACTER_VALIDATION_PATTERN = "[^?^\"'@#*$%&()}{\\[\\]|\\\\/~+=<>]*$";
     public static final String ID_IS_REQUIRED = "{product.management.id.required}";
-    public static final String PRODUCT_GROUP_NAME_IS_REQUIRED = "{warehouse.product.group.name.required}";
-    public static final String WAREHOUSE_NAME_IS_REQUIRED = "{warehouse.name.required}";
     public static final String ENTITY_NOT_FOUND = "There is no %s with the passed id: %s";
     public static final String ENTITY_EXISTS = "%s with %s: %s already exists";
     public static final String PRODUCT = "Product";
@@ -25,8 +25,5 @@ public class Constants {
     public static final String WAREHOUSE = "Warehouse";
     public static final String PRODUCT_NAME = "productName";
     public static final String PRODUCT_GROUP_NAME = "productGroupName";
-
-
   }
-
 }

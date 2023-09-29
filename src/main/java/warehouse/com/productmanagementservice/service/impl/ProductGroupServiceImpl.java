@@ -2,6 +2,7 @@ package warehouse.com.productmanagementservice.service.impl;
 
 
 import static net.logstash.logback.argument.StructuredArguments.keyValue;
+import static warehouse.com.productmanagementservice.common.Constants.Logging.ID;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_EXISTS;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_NOT_FOUND;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.PRODUCT_GROUP;
@@ -18,8 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import warehouse.com.productmanagementservice.mapper.ProductGroupMapper;
-import warehouse.com.productmanagementservice.model.Product;
-import warehouse.com.productmanagementservice.model.ProductGroup;
+import warehouse.com.productmanagementservice.model.entity.Product;
+import warehouse.com.productmanagementservice.model.entity.ProductGroup;
 import warehouse.com.productmanagementservice.model.dto.request.CreateProductGroupDto;
 import warehouse.com.productmanagementservice.repository.ProductGroupRepository;
 import warehouse.com.productmanagementservice.repository.ProductRepository;
@@ -77,6 +78,7 @@ public class ProductGroupServiceImpl implements ProductGroupService {
 
   @Override
   public void deleteById(Long id) {
+    log.debug("Deleting product group with {}", keyValue(ID, id));
     productGroupRepository.deleteById(id);
   }
 

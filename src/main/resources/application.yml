@@ -20,3 +20,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+
+scheduler:
+  order-clearing-job-cron: ${@hourly}
