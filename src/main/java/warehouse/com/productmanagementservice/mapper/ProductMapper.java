@@ -32,8 +32,8 @@ public interface ProductMapper {
   ProductResponseDto toDto(Product product);
 
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-  Product partialUpdate(
-      ProductResponseDto productResponseDto, @MappingTarget Product product);
+  void partialUpdate(
+      ProductDto productDto, @MappingTarget Product product);
 
   @Named("mapStockItemIds")
   default List<ProductStockResponseDto> mapStockItemIds(List<ProductStock> stockItems) {

@@ -7,4 +7,6 @@ import warehouse.com.productmanagementservice.model.ProductGroup;
 @Repository
 public interface ProductGroupRepository extends JpaRepository<ProductGroup, Long> {
 
+  boolean existsByProductGroupName(String groupName);
+
 }

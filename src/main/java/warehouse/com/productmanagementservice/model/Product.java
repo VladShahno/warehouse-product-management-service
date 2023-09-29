@@ -10,9 +10,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -51,7 +48,7 @@ public class Product implements Serializable {
   private String productName;
 
   @Column(name = "amount_reserved", nullable = false)
-  private int amountOfReserved;
+  private Integer amountOfReserved;
 
   @Column(name = "purchase_price", nullable = false)
   private BigDecimal purchasePrice;
@@ -59,19 +56,13 @@ public class Product implements Serializable {
   @Column(name = "sale_price", nullable = false)
   private BigDecimal salePrice;
 
-  @ManyToOne(optional = false, cascade = CascadeType.ALL)
+  @ManyToOne(optional = false, cascade = {
+      CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
+  })
   @JsonBackReference
   private ProductGroup productGroup;
 
-  @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(
-      name = "product_warehouse",
-      joinColumns = {@JoinColumn(name = "product_id")},
-      inverseJoinColumns = {@JoinColumn(name = "warehouse_id")}
-  )
-  private List<Warehouse> warehouses;
-
-  @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   private List<ProductStock> stockItems;
 
   @Column(name = "article", nullable = false)

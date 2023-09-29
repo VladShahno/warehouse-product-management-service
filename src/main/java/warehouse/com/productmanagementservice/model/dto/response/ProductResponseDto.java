@@ -4,11 +4,10 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record ProductResponseDto(String productName,
-                                 int amountOfReserved,
+                                 Integer amountOfReserved,
                                  BigDecimal purchasePrice,
                                  BigDecimal salePrice,
                                  ProductGroupResponseDto productGroup,
-                                 List<WarehouseResponseDto> warehouses,
                                  List<ProductStockResponseDto> stockItems,
                                  String article) {
 

@@ -1,6 +1,9 @@
 package warehouse.com.productmanagementservice.service.impl;
 
 
+import static net.logstash.logback.argument.StructuredArguments.keyValue;
+import static warehouse.com.productmanagementservice.common.Constants.Logging.ID;
+import static warehouse.com.productmanagementservice.common.Constants.Logging.NAME;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_EXISTS;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_NOT_FOUND;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.PRODUCT;
@@ -8,8 +11,8 @@ import static warehouse.com.productmanagementservice.common.Constants.ProductMan
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,9 +25,9 @@ import warehouse.com.productmanagementservice.model.ProductStock;
 import warehouse.com.productmanagementservice.model.dto.request.ProductDto;
 import warehouse.com.productmanagementservice.repository.ProductRepository;
 import warehouse.com.productmanagementservice.repository.ProductStockRepository;
-import warehouse.com.productmanagementservice.repository.WarehouseRepository;
 import warehouse.com.productmanagementservice.service.ProductGroupService;
 import warehouse.com.productmanagementservice.service.ProductService;
+import warehouse.com.productmanagementservice.service.ProductStockService;
 import warehouse.com.productmanagementservice.service.WarehouseService;
 
 @Slf4j
@@ -37,13 +40,14 @@ public class ProductServiceImpl implements ProductService {
   private final ProductMapper productMapper;
   private final ProductGroupService productGroupService;
   private final WarehouseService warehouseService;
-  private final WarehouseRepository warehouseRepository;
   private final ProductStockRepository productStockRepository;
+  private final ProductStockService productStockService;
 
   @Override
   public Product findById(Long id) {
     return productRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException(String.format(ENTITY_NOT_FOUND, id)));
+        .orElseThrow(
+            () -> new EntityNotFoundException(String.format(ENTITY_NOT_FOUND, PRODUCT, id)));
   }
 
   @Override
@@ -53,6 +57,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   public void deleteById(Long id) {
+    log.debug("Deleting product with {}", keyValue(ID, id));
     productRepository.deleteById(id);
   }
 
@@ -62,32 +67,31 @@ public class ProductServiceImpl implements ProductService {
 
     var productGroup = productGroupService.findById(productDto.getProductGroupId());
 
-    var warehouses = productDto.getWarehouseIds()
-        .stream()
-        .map(warehouseRepository::findById)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .toList();
-
     var product = productMapper.toEntityFromRequestDto(productDto);
     product.setProductGroup(productGroup);
-    product.setWarehouses(warehouses);
 
-    var productStocks = productDto.getStockItems().stream()
-        .flatMap(productStockDto ->
-            warehouseRepository.findById(productStockDto.getWarehouseId())
-                .map(warehouse -> ProductStock.builder()
-                    .warehouse(warehouse)
-                    .product(product)
-                    .quantity(productStockDto.getQuantity())
-                    .build())
-                .stream())
+    var productStocks = productDto.getStockItems()
+        .stream()
+        .flatMap(productStockDto -> {
+          var warehouse = warehouseService.findById(productStockDto.getWarehouseId());
+          ProductStock productStock = ProductStock.builder()
+              .warehouse(warehouse)
+              .product(product)
+              .quantity(productStockDto.getQuantity())
+              .build();
+          return Stream.of(productStock);
+        })
         .toList();
 
     product.setStockItems(productStocks);
 
+    log.debug("Creating ProductStocks with {}",
+        keyValue(ID, productStocks.stream()
+            .map(ProductStock::getId)
+            .toList()));
     productStockRepository.saveAll(productStocks);
 
+    log.debug("Creating Product with {}", keyValue(NAME, product.getProductName()));
     return productRepository.save(product);
   }
 
@@ -99,6 +103,7 @@ public class ProductServiceImpl implements ProductService {
 
     var updatedProduct = updateProduct(productToUpdate, productDto);
 
+    log.debug("Updating product with {}", keyValue(NAME, updatedProduct.getProductName()));
     return productRepository.save(updatedProduct);
   }
 
@@ -122,33 +127,21 @@ public class ProductServiceImpl implements ProductService {
   private Product updateProduct(Product productToUpdate, ProductDto productDto) {
     var productGroup = productGroupService.findById(productDto.getProductGroupId());
 
-    var warehouses = productDto.getWarehouseIds()
-        .stream()
-        .map(warehouseRepository::findById)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .collect(Collectors.toList());
-
     var productStocks = productDto.getStockItems()
         .stream()
-        .flatMap(productStockDto -> productStockRepository.findByProduct_IdAndWarehouse_Id(
-                productStockDto.getProductId(),
-                productStockDto.getWarehouseId())
-            .map(productStock -> {
-              productStock.setQuantity(productStockDto.getQuantity());
-              return productStock;
-            })
-            .stream())
+        .flatMap(productStockDto -> {
+          var productStock = productStockService.findByProductIdAndWarehouseId(
+              productStockDto.getProductId(),
+              productStockDto.getWarehouseId()
+          );
+          productStock.setQuantity(productStockDto.getQuantity());
+          return Stream.of(productStock);
+        })
         .collect(Collectors.toList());
 
+    productMapper.partialUpdate(productDto, productToUpdate);
     productToUpdate.setProductGroup(productGroup);
-    productToUpdate.setAmountOfReserved(productDto.getAmountOfReserved());
-    productToUpdate.setWarehouses(warehouses);
     productToUpdate.setStockItems(productStocks);
-    productToUpdate.setProductName(productDto.getProductName());
-    productToUpdate.setPurchasePrice(productDto.getPurchasePrice());
-    productToUpdate.setSalePrice(productDto.getSalePrice());
-    productToUpdate.setArticle(productDto.getArticle());
 
     return productToUpdate;
   }

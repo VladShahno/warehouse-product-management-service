@@ -4,17 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,9 +39,6 @@ public class Warehouse implements Serializable {
 
   @Column(name = "warehouse_name", unique = true, nullable = false)
   private String warehouseName;
-
-  @ManyToMany(mappedBy = "warehouses", fetch = FetchType.EAGER)
-  private List<Product> products;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "created", updatable = false)

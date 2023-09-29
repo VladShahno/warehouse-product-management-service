@@ -1,6 +1,7 @@
 package warehouse.com.productmanagementservice.service.impl;
 
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_NOT_FOUND;
+import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.WAREHOUSE;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,8 @@ public class WarehouseServiceImpl implements WarehouseService {
   @Override
   public Warehouse findById(Long id) {
     return warehouseRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException(String.format(ENTITY_NOT_FOUND, id)));
+        .orElseThrow(
+            () -> new EntityNotFoundException(String.format(ENTITY_NOT_FOUND, WAREHOUSE, id)));
   }
 
   @Override
