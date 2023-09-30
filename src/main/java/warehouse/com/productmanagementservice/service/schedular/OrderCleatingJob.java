@@ -15,6 +15,7 @@ public class OrderCleatingJob {
 
   @Scheduled(cron = "${scheduler.order-clearing-job-cron}")
   public void checkAndCancelExpiredOrders() {
+    log.info("Run order clearing job");
     orderService.cancelExpiredOrders();
   }
 }

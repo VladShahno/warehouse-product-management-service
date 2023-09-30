@@ -1,8 +1,11 @@
 package warehouse.com.productmanagementservice.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import warehouse.com.productmanagementservice.model.entity.ProductStock;
@@ -24,5 +27,18 @@ public class ProductStockServiceImpl implements ProductStockService {
             () -> new EntityNotFoundException(String.format(
                 "There is no Product Stock with the passed productId: %s and warehouseId: %s",
                 productId, warehouseId)));
+  }
+
+  @Override
+  public List<ProductStock> findAllByProductIdAndWarehouseId(Set<Long> productIds,
+      List<Long> warehouseIds) {
+    var productStocks = productStockRepository.findAllByProduct_IdInAndWarehouse_IdIn(productIds,
+        warehouseIds);
+    if (CollectionUtils.isEmpty(productStocks)) {
+      throw new EntityNotFoundException(String.format(
+          "There is no Product Stock with the passed productId: %s and warehouseId: %s",
+          productIds, warehouseIds));
+    }
+    return productStocks;
   }
 }

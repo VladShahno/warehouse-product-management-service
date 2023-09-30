@@ -12,7 +12,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,39 +48,50 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   public Order createOrder(List<OrderItemDto> orderItemDtos) {
-    List<ProductStock> productStocksToUpdate = new ArrayList<>();
-    List<OrderItem> items = new ArrayList<>();
+    List<OrderItem> orderItems = new ArrayList<>();
+
+    Map<Long, Integer> productIdToQuantity = new HashMap<>();
+    Map<Long, Long> productIdToWarehouseId = new HashMap<>();
 
     orderItemDtos.forEach(orderItemDto -> {
       var productId = orderItemDto.getProductId();
       var requestedQuantity = orderItemDto.getQuantity();
+      productIdToQuantity.put(productId, requestedQuantity);
+      productIdToWarehouseId.put(productId, orderItemDto.getWarehouseId());
+    });
 
-      var productStock = productStockService.findByProductIdAndWarehouseId(productId,
-          orderItemDto.getWarehouseId());
+    List<ProductStock> productStocks = productStockService.findAllByProductIdAndWarehouseId(
+        productIdToQuantity.keySet(),
+        new ArrayList<>(productIdToWarehouseId.values())
+    );
 
-      if (Objects.isNull(productStock) || productStock.getQuantity() < requestedQuantity) {
+    // Verify stock availability and build order orderItems
+    productStocks.forEach(productStock -> {
+      var productId = productStock.getProduct().getId();
+      var requestedQuantity = productIdToQuantity.get(productId);
+      var warehouseId = productIdToWarehouseId.get(productId);
+
+      if (productStock.getQuantity() < requestedQuantity) {
         throw new InsufficientStockException(
             String.format("Not enough stock available for productId: %s", productId));
       }
 
-      var orderItem = orderItemMapper.toEntity(orderItemDto);
+      var orderItem = orderItemMapper.toEntity(
+          new OrderItemDto(productId, warehouseId, requestedQuantity));
       orderItem.setProduct(productStock.getProduct());
-      items.add(orderItem);
+      orderItems.add(orderItem);
 
       productStock.setQuantity(productStock.getQuantity() - requestedQuantity);
-
-      productStocksToUpdate.add(productStock);
     });
-    productStockRepository.saveAll(productStocksToUpdate);
+    productStockRepository.saveAll(productStocks);
 
     var order = Order.builder()
-        .orderItems(items)
+        .orderItems(orderItems)
         .status(OrderStatus.RESERVED)
         .created(new Date())
         .build();
 
-    items.forEach(orderItem -> orderItem.setOrder(order));
-
+    orderItems.forEach(orderItem -> orderItem.setOrder(order));
     var savedOrder = orderRepository.save(order);
 
     log.info("Creating Order with {}", kv(ID, savedOrder.getId()));
@@ -122,32 +136,40 @@ public class OrderServiceImpl implements OrderService {
     var orderToUpdate = findOrderById(orderId);
 
     if (OrderStatus.CANCELLED.equals(orderStatus)) {
-      orderToUpdate.getOrderItems().forEach(orderItem -> {
-        var product = orderItem.getProduct();
-        var reservedQuantity = orderItem.getQuantity();
-        var productStock = productStockService.findByProductIdAndWarehouseId(
-            product.getId(), orderItem.getWarehouseId()
-        );
+      List<Long> productIds = orderToUpdate.getOrderItems().stream()
+          .map(orderItem -> orderItem.getProduct().getId())
+          .toList();
 
-        if (Objects.nonNull(productStock)) {
-          productStock.setQuantity(productStock.getQuantity() + reservedQuantity);
-          log.info(
-              "Updating Product Stock with {} amd return {} to the warehouse with {}",
-              kv(ID, productStock.getId()),
-              kv(PRODUCT, reservedQuantity),
-              kv(ID, orderItem.getWarehouseId()));
-          productStockRepository.save(productStock);
-        }
+      List<Long> warehouseIds = orderToUpdate.getOrderItems().stream()
+          .map(OrderItem::getWarehouseId)
+          .toList();
+
+      List<ProductStock> productStocks = productStockService.findAllByProductIdAndWarehouseId(
+          new HashSet<>(productIds), warehouseIds
+      );
+
+      productStocks.forEach(productStock -> {
+        var reservedQuantity = orderToUpdate.getOrderItems().stream()
+            .filter(orderItem -> orderItem.getProduct().getId()
+                .equals(productStock.getProduct().getId()))
+            .mapToInt(OrderItem::getQuantity)
+            .sum();
+
+        log.info(
+            "Updating Product Stocks with {} and return {} to the warehouse with {}",
+            kv(ID, productStock.getId()),
+            kv(PRODUCT, reservedQuantity),
+            kv(ID, productStock.getWarehouse().getId()));
+        productStock.setQuantity(productStock.getQuantity() + reservedQuantity);
       });
-      orderToUpdate.setStatus(OrderStatus.CANCELLED);
-      log.info("Updating Order to {} with {} ", kv(ORDER_STATUS, orderStatus),
-          kv(ID, orderToUpdate.getId()));
-
+      productStockRepository.saveAll(productStocks);
     }
+    orderToUpdate.setStatus(orderStatus);
+    orderRepository.save(orderToUpdate);
 
-    log.info("Updating Order to {} with {} ", kv(ORDER_STATUS, orderStatus),
-        kv(ID, orderToUpdate.getId()));
-    return orderRepository.save(orderToUpdate);
+    log.info("Updating Order with {} to {}", kv(ID, orderToUpdate.getId()),
+        kv(ORDER_STATUS, orderStatus));
+    return orderToUpdate;
   }
 
   @Override
