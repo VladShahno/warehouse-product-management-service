@@ -4,8 +4,12 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
 import static warehouse.com.productmanagementservice.common.Constants.Logging.ID;
 import static warehouse.com.productmanagementservice.common.Constants.Logging.ORDER_STATUS;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_NOT_FOUND;
+import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.NOT_UPDATABLE_ORDER;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ORDER;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.PRODUCT;
+import static warehouse.com.productmanagementservice.model.order.OrderStatus.CANCELLED;
+import static warehouse.com.productmanagementservice.model.order.OrderStatus.COMPLETED;
+import static warehouse.com.productmanagementservice.model.order.OrderStatus.RESERVED;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
@@ -24,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import warehouse.com.productmanagementservice.exception.InsufficientStockException;
+import warehouse.com.productmanagementservice.exception.NotUpdatableOrderException;
 import warehouse.com.productmanagementservice.mapper.OrderItemMapper;
 import warehouse.com.productmanagementservice.model.dto.request.OrderItemDto;
 import warehouse.com.productmanagementservice.model.entity.Order;
@@ -87,7 +92,7 @@ public class OrderServiceImpl implements OrderService {
 
     var order = Order.builder()
         .orderItems(orderItems)
-        .status(OrderStatus.RESERVED)
+        .status(RESERVED)
         .created(new Date())
         .build();
 
@@ -104,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
     LocalDateTime oneDayAgo = now.minusDays(1);
 
     List<Order> expiredOrders = orderRepository.findAllByStatusAndCreatedBefore(
-        OrderStatus.RESERVED, Date.from(oneDayAgo.atZone(ZoneId.systemDefault()).toInstant())
+        RESERVED, Date.from(oneDayAgo.atZone(ZoneId.systemDefault()).toInstant())
     );
 
     expiredOrders.forEach(order -> {
@@ -125,7 +130,7 @@ public class OrderServiceImpl implements OrderService {
           productStockRepository.save(productStock);
         }
       });
-      order.setStatus(OrderStatus.CANCELLED);
+      order.setStatus(CANCELLED);
       log.info("Updating expired Order with {} ", kv(ID, order.getId()));
     });
     orderRepository.saveAll(expiredOrders);
@@ -135,7 +140,14 @@ public class OrderServiceImpl implements OrderService {
   public Order updateOrderStatus(Long orderId, OrderStatus orderStatus) {
     var orderToUpdate = findOrderById(orderId);
 
-    if (OrderStatus.CANCELLED.equals(orderStatus)) {
+    var existingOrderStatus = orderToUpdate.getStatus();
+
+    if (CANCELLED.equals(existingOrderStatus) || COMPLETED.equals(existingOrderStatus)) {
+      throw new NotUpdatableOrderException(
+          String.format(NOT_UPDATABLE_ORDER, orderToUpdate.getId()));
+    }
+
+    if (CANCELLED.equals(orderStatus)) {
       List<Long> productIds = orderToUpdate.getOrderItems().stream()
           .map(orderItem -> orderItem.getProduct().getId())
           .toList();
