@@ -32,7 +32,7 @@ import warehouse.com.productmanagementservice.model.order.OrderStatus;
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"created", "updated"}, allowGetters = true)
 @Entity
-@Table(name = "order")
+@Table(name = "orders")
 public class Order implements Serializable {
 
   @Id

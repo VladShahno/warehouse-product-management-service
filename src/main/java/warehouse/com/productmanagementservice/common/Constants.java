@@ -10,6 +10,7 @@ public class Constants {
 
     public static final String NAME = "name";
     public static final String ID = "id";
+    public static final String ORDER_STATUS = "orderStatus";
   }
 
   @UtilityClass
@@ -21,6 +22,7 @@ public class Constants {
     public static final String ENTITY_NOT_FOUND = "There is no %s with the passed id: %s";
     public static final String ENTITY_EXISTS = "%s with %s: %s already exists";
     public static final String PRODUCT = "Product";
+    public static final String ORDER = "Order";
     public static final String PRODUCT_GROUP = "Product Group";
     public static final String WAREHOUSE = "Warehouse";
     public static final String PRODUCT_NAME = "productName";

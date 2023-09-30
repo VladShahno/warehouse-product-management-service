@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import warehouse.com.productmanagementservice.mapper.ProductMapper;
-import warehouse.com.productmanagementservice.model.entity.ProductGroup;
 import warehouse.com.productmanagementservice.model.dto.request.ProductDto;
 import warehouse.com.productmanagementservice.model.dto.response.ProductResponseDto;
 import warehouse.com.productmanagementservice.service.ProductService;
@@ -94,7 +93,7 @@ public class ProductController {
   @Operation(summary = "Endpoint allows to get all products")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Products received successfully",
-          content = {@Content(schema = @Schema(implementation = ProductGroup.class))}),
+          content = {@Content(schema = @Schema(implementation = ProductResponseDto.class))}),
   })
   public Page<ProductResponseDto> findAllProducts(
       @PageableDefault(size = 25, sort = {"productName"}) Pageable pageable) {
