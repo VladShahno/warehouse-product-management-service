@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -61,7 +61,7 @@ public class OrderController {
   })
   public OrderResponseDto getOrderById(
       @Parameter(description = "Target order id", example = "5")
-      @NotBlank(message = ID_IS_REQUIRED) @PathVariable Long id) {
+      @NotNull(message = ID_IS_REQUIRED) @PathVariable Long id) {
     return orderMapper.toDto(orderService.findOrderById(id));
   }
 
@@ -73,7 +73,7 @@ public class OrderController {
   })
   public OrderResponseDto updateOrder(
       @Parameter(description = "Target order id", example = "6")
-      @NotBlank(message = ID_IS_REQUIRED) @PathVariable Long id,
+      @NotNull(message = ID_IS_REQUIRED) @PathVariable Long id,
       @RequestBody @Valid OrderStatus orderStatus) {
     return orderMapper.toDto(orderService.updateOrderStatus(id, orderStatus));
   }

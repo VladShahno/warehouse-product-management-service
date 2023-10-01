@@ -11,7 +11,6 @@ import static warehouse.com.productmanagementservice.model.order.OrderStatus.CAN
 import static warehouse.com.productmanagementservice.model.order.OrderStatus.COMPLETED;
 import static warehouse.com.productmanagementservice.model.order.OrderStatus.RESERVED;
 
-import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -39,6 +38,7 @@ import warehouse.com.productmanagementservice.repository.OrderRepository;
 import warehouse.com.productmanagementservice.repository.ProductStockRepository;
 import warehouse.com.productmanagementservice.service.OrderService;
 import warehouse.com.productmanagementservice.service.ProductStockService;
+import warehouse.com.reststarter.exception.NotFoundException;
 
 @Slf4j
 @Transactional
@@ -187,7 +187,7 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public Order findOrderById(Long orderId) {
     return orderRepository.findById(orderId).orElseThrow(
-        () -> new EntityNotFoundException(String.format(ENTITY_NOT_FOUND, ORDER, orderId)));
+        () -> new NotFoundException(String.format(ENTITY_NOT_FOUND, ORDER, orderId)));
   }
 
   @Override

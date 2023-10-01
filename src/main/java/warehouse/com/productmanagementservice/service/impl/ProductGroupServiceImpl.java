@@ -8,8 +8,6 @@ import static warehouse.com.productmanagementservice.common.Constants.ProductMan
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.PRODUCT_GROUP;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.PRODUCT_GROUP_NAME;
 
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +23,8 @@ import warehouse.com.productmanagementservice.model.entity.ProductGroup;
 import warehouse.com.productmanagementservice.repository.ProductGroupRepository;
 import warehouse.com.productmanagementservice.repository.ProductRepository;
 import warehouse.com.productmanagementservice.service.ProductGroupService;
+import warehouse.com.reststarter.exception.EntityExistsException;
+import warehouse.com.reststarter.exception.NotFoundException;
 
 @Slf4j
 @Transactional
@@ -68,7 +68,7 @@ public class ProductGroupServiceImpl implements ProductGroupService {
   public ProductGroup findById(Long id) {
     return productGroupRepository.findById(id)
         .orElseThrow(
-            () -> new EntityNotFoundException(String.format(ENTITY_NOT_FOUND, PRODUCT_GROUP, id)));
+            () -> new NotFoundException(String.format(ENTITY_NOT_FOUND, PRODUCT_GROUP, id)));
   }
 
   @Override

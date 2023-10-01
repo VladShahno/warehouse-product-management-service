@@ -6,7 +6,6 @@ import static warehouse.com.productmanagementservice.common.Constants.Logging.NA
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_NOT_FOUND;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.WAREHOUSE;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,6 +17,7 @@ import warehouse.com.productmanagementservice.model.dto.request.WarehouseDto;
 import warehouse.com.productmanagementservice.model.entity.Warehouse;
 import warehouse.com.productmanagementservice.repository.WarehouseRepository;
 import warehouse.com.productmanagementservice.service.WarehouseService;
+import warehouse.com.reststarter.exception.NotFoundException;
 
 @Slf4j
 @Transactional
@@ -49,7 +49,7 @@ public class WarehouseServiceImpl implements WarehouseService {
   public Warehouse findById(Long id) {
     return warehouseRepository.findById(id)
         .orElseThrow(
-            () -> new EntityNotFoundException(String.format(ENTITY_NOT_FOUND, WAREHOUSE, id)));
+            () -> new NotFoundException(String.format(ENTITY_NOT_FOUND, WAREHOUSE, id)));
   }
 
   @Override

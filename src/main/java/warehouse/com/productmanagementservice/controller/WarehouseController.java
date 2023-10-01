@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -73,7 +73,7 @@ public class WarehouseController {
   })
   public WarehouseResponseDto updateWarehouse(
       @Parameter(description = "Target warehouse id", example = "1")
-      @NotBlank(message = ID_IS_REQUIRED) @PathVariable Long id,
+      @NotNull(message = ID_IS_REQUIRED) @PathVariable Long id,
       @RequestBody @Valid WarehouseDto requestDto) {
     return warehouseMapper.toWarehouseResponseDto(warehouseService.update(id, requestDto));
   }
@@ -86,7 +86,7 @@ public class WarehouseController {
   })
   public void deleteWarehouseById(
       @Parameter(description = "Target warehouse id", example = "1")
-      @NotBlank(message = ID_IS_REQUIRED) @PathVariable Long id) {
+      @NotNull(message = ID_IS_REQUIRED) @PathVariable Long id) {
     warehouseService.deleteById(id);
   }
 
@@ -98,7 +98,7 @@ public class WarehouseController {
   })
   public WarehouseResponseDto getWarehouseById(
       @Parameter(description = "Target product id", example = "1")
-      @NotBlank(message = ID_IS_REQUIRED) @PathVariable Long id) {
+      @NotNull(message = ID_IS_REQUIRED) @PathVariable Long id) {
     return warehouseMapper.toWarehouseResponseDto(warehouseService.findById(id));
   }
 }

@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -66,7 +66,7 @@ public class ProductGroupController {
   })
   public void deleteProductGroup(
       @Parameter(description = "Target product group id", example = "1")
-      @NotBlank(message = ID_IS_REQUIRED) @PathVariable Long id) {
+      @NotNull(message = ID_IS_REQUIRED) @PathVariable Long id) {
     productGroupService.deleteById(id);
   }
 
@@ -78,7 +78,7 @@ public class ProductGroupController {
   })
   public ProductGroupFullResponseDto getProductGroupById(
       @Parameter(description = "Target product name", example = "1")
-      @NotBlank(message = ID_IS_REQUIRED) @PathVariable Long id) {
+      @NotNull(message = ID_IS_REQUIRED) @PathVariable Long id) {
     return productGroupMapper.toProductGroupFullResponseDto(productGroupService.findById(id));
   }
 
@@ -101,7 +101,7 @@ public class ProductGroupController {
   })
   public ProductGroupFullResponseDto updateProductGroup(
       @Parameter(description = "Target product group name", example = "1")
-      @NotBlank(message = ID_IS_REQUIRED) @PathVariable Long id,
+      @NotNull(message = ID_IS_REQUIRED) @PathVariable Long id,
       @RequestBody @Valid CreateProductGroupDto requestDto) {
     return productGroupMapper.toProductGroupFullResponseDto(
         productGroupService.update(id, requestDto));

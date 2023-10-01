@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -59,7 +60,7 @@ public class ProductController {
   })
   public ProductResponseDto getProductById(
       @Parameter(description = "Target product id", example = "5")
-      @NotBlank(message = ID_IS_REQUIRED) @PathVariable Long id) {
+      @NotNull(message = ID_IS_REQUIRED) @PathVariable Long id) {
     return productMapper.toDto(productService.findById(id));
   }
 
@@ -84,7 +85,7 @@ public class ProductController {
   })
   public void deleteProduct(
       @Parameter(description = "Target product id", example = "5")
-      @NotBlank(message = ID_IS_REQUIRED) @PathVariable Long id) {
+      @NotNull(message = ID_IS_REQUIRED) @PathVariable Long id) {
     productService.deleteById(id);
   }
 

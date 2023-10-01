@@ -9,8 +9,6 @@ import static warehouse.com.productmanagementservice.common.Constants.ProductMan
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.PRODUCT;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.PRODUCT_NAME;
 
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +27,8 @@ import warehouse.com.productmanagementservice.service.ProductGroupService;
 import warehouse.com.productmanagementservice.service.ProductService;
 import warehouse.com.productmanagementservice.service.ProductStockService;
 import warehouse.com.productmanagementservice.service.WarehouseService;
+import warehouse.com.reststarter.exception.EntityExistsException;
+import warehouse.com.reststarter.exception.NotFoundException;
 
 @Slf4j
 @Transactional
@@ -47,7 +47,7 @@ public class ProductServiceImpl implements ProductService {
   public Product findById(Long id) {
     return productRepository.findById(id)
         .orElseThrow(
-            () -> new EntityNotFoundException(String.format(ENTITY_NOT_FOUND, PRODUCT, id)));
+            () -> new NotFoundException(String.format(ENTITY_NOT_FOUND, PRODUCT, id)));
   }
 
   @Override

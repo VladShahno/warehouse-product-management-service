@@ -1,6 +1,5 @@
 package warehouse.com.productmanagementservice.service.impl;
 
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import warehouse.com.productmanagementservice.model.entity.ProductStock;
 import warehouse.com.productmanagementservice.repository.ProductStockRepository;
 import warehouse.com.productmanagementservice.service.ProductStockService;
+import warehouse.com.reststarter.exception.NotFoundException;
 
 @Slf4j
 @Transactional
@@ -24,7 +24,7 @@ public class ProductStockServiceImpl implements ProductStockService {
   public ProductStock findByProductIdAndWarehouseId(Long productId, Long warehouseId) {
     return productStockRepository.findByProduct_IdAndWarehouse_Id(productId, warehouseId)
         .orElseThrow(
-            () -> new EntityNotFoundException(String.format(
+            () -> new NotFoundException(String.format(
                 "There is no Product Stock with the passed productId: %s and warehouseId: %s",
                 productId, warehouseId)));
   }
@@ -35,7 +35,7 @@ public class ProductStockServiceImpl implements ProductStockService {
     var productStocks = productStockRepository.findAllByProduct_IdInAndWarehouse_IdIn(productIds,
         warehouseIds);
     if (CollectionUtils.isEmpty(productStocks)) {
-      throw new EntityNotFoundException(String.format(
+      throw new NotFoundException(String.format(
           "There is no Product Stock with the passed productId: %s and warehouseId: %s",
           productIds, warehouseIds));
     }
