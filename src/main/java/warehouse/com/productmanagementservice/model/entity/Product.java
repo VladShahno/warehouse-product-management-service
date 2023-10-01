@@ -47,9 +47,6 @@ public class Product implements Serializable {
   @Column(name = "product_name", unique = true, nullable = false)
   private String productName;
 
-  @Column(name = "amount_reserved", nullable = false)
-  private Integer amountOfReserved;
-
   @Column(name = "purchase_price", nullable = false)
   private BigDecimal purchasePrice;
 

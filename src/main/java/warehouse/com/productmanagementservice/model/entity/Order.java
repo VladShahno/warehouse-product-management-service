@@ -12,6 +12,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,6 +23,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import warehouse.com.productmanagementservice.model.order.OrderStatus;
 
@@ -45,6 +49,13 @@ public class Order implements Serializable {
   @Enumerated(EnumType.STRING)
   private OrderStatus status;
 
-  @Column(name = "created", nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "created", updatable = false)
+  @CreatedDate
   private Date created;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "updated")
+  @LastModifiedDate
+  private Date updated;
 }

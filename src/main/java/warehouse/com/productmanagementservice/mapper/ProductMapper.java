@@ -10,11 +10,11 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
-import warehouse.com.productmanagementservice.model.entity.Product;
-import warehouse.com.productmanagementservice.model.entity.ProductStock;
 import warehouse.com.productmanagementservice.model.dto.request.ProductDto;
 import warehouse.com.productmanagementservice.model.dto.response.ProductResponseDto;
 import warehouse.com.productmanagementservice.model.dto.response.ProductStockResponseDto;
+import warehouse.com.productmanagementservice.model.entity.Product;
+import warehouse.com.productmanagementservice.model.entity.ProductStock;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = ComponentModel.SPRING)
 public interface ProductMapper {

@@ -6,8 +6,8 @@ import org.mapstruct.MappingConstants.ComponentModel;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
-import warehouse.com.productmanagementservice.model.entity.ProductStock;
 import warehouse.com.productmanagementservice.model.dto.request.ProductStockDto;
+import warehouse.com.productmanagementservice.model.entity.ProductStock;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = ComponentModel.SPRING)
 public interface ProductStockMapper {

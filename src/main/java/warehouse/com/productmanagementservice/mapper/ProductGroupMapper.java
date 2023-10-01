@@ -10,11 +10,11 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
-import warehouse.com.productmanagementservice.model.entity.Product;
-import warehouse.com.productmanagementservice.model.entity.ProductGroup;
 import warehouse.com.productmanagementservice.model.dto.request.CreateProductGroupDto;
 import warehouse.com.productmanagementservice.model.dto.request.ProductGroupDto;
 import warehouse.com.productmanagementservice.model.dto.response.ProductGroupFullResponseDto;
+import warehouse.com.productmanagementservice.model.entity.Product;
+import warehouse.com.productmanagementservice.model.entity.ProductGroup;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = ComponentModel.SPRING)
 public interface ProductGroupMapper {
