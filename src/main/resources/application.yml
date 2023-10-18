@@ -6,6 +6,26 @@ server:
     context-path: /product-management-service
 
 spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKER_URL:localhost:29092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: ${random.uuid}
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      enable-auto-commit: true
+      auto-commit-interval: 100ms
+      max-poll-records: ${KAFKA_MAX_POLL_RECORDS:500}
+      properties:
+        max-poll-interval-ms: ${KAFKA_MAX_POLL_INTERVAL_MS:300000}
+        spring:
+          deserializer:
+            key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+            value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+          json:
+            trusted.packages: warehouse.com.eventstarter.model
   datasource:
     url: jdbc:postgresql://localhost:5432/product-management
     username: user
@@ -20,6 +40,8 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+  main:
+    allow-bean-definition-overriding: true
 
 scheduler:
   order-clearing-job-cron: ${@hourly}
@@ -28,3 +50,17 @@ information:
   disclosure:
     handling:
       displayed-message:
+
+kafka:
+  consumer:
+    fixed-backoff:
+      interval: ${KAFKA_CONSUMER_FIXED_BACKOFF_INTERVAL:2000}
+      max-failure: ${KAFKA_CONSUMER_FIXED_BACKOFF_INTERVAL_MAX_FAILURE:5}
+  topics:
+    audit:
+      name: ${AUDIT_EVENT:warehouse-audit-event}
+      event-class: AuditEvent
+
+logging:
+  level:
+    warehouse.com: debug

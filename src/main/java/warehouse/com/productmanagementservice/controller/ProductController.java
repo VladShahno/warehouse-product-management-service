@@ -10,13 +10,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +36,7 @@ import warehouse.com.productmanagementservice.service.ProductService;
 @AllArgsConstructor
 @Validated
 @Tag(name = "Product Controller", description = "Provides general operation with Product")
-@RequestMapping(path = "/v1/products")
+@RequestMapping(path = "/v1/products", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ProductController {
 
   private final ProductService productService;
@@ -72,7 +72,7 @@ public class ProductController {
   })
   public ProductResponseDto updateProduct(
       @Parameter(description = "Target product id", example = "6")
-      @NotBlank(message = ID_IS_REQUIRED) @PathVariable Long id,
+      @NotNull(message = ID_IS_REQUIRED) @PathVariable Long id,
       @RequestBody @Valid ProductDto requestDto) {
     return productMapper.toDto(productService.update(id, requestDto));
   }

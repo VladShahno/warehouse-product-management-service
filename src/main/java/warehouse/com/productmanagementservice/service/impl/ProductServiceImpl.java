@@ -17,6 +17,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import warehouse.com.audit.starter.annotation.AuditEvent;
+import warehouse.com.audit.starter.service.AuditService;
 import warehouse.com.productmanagementservice.mapper.ProductMapper;
 import warehouse.com.productmanagementservice.model.dto.request.ProductDto;
 import warehouse.com.productmanagementservice.model.entity.Product;
@@ -42,6 +44,7 @@ public class ProductServiceImpl implements ProductService {
   private final WarehouseService warehouseService;
   private final ProductStockRepository productStockRepository;
   private final ProductStockService productStockService;
+  private final AuditService auditService;
 
   @Override
   public Product findById(Long id) {
@@ -62,6 +65,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
+  @AuditEvent
   public Product create(ProductDto productDto) {
     validateCreateRequest(productDto);
 
@@ -92,7 +96,11 @@ public class ProductServiceImpl implements ProductService {
     productStockRepository.saveAll(productStocks);
 
     log.debug("Creating Product with {}", keyValue(NAME, product.getProductName()));
-    return productRepository.save(product);
+    var savedProduct = productRepository.save(product);
+
+    auditService.sendAuditEvent(savedProduct, "prod", "testInit", "desc");
+
+    return savedProduct;
   }
 
   @Override

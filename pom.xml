@@ -2,23 +2,35 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <description>product-management-service</description>
+  <groupId>warehouse.com</groupId>
   <artifactId>product-management-service</artifactId>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>
-              <artifactId>lombok</artifactId>
-              <groupId>org.projectlombok</groupId>
-            </exclude>
-          </excludes>
-        </configuration>
-        <groupId>org.springframework.boot</groupId>
-      </plugin>
-    </plugins>
-  </build>
+  <modelVersion>4.0.0</modelVersion>
+  <name>product-management-service</name>
+
+  <parent>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <groupId>org.springframework.boot</groupId>
+    <relativePath/>
+    <version>3.1.4</version> <!-- lookup parent from repository -->
+  </parent>
+
+  <properties>
+    <apache.commons-collections4.version>4.4</apache.commons-collections4.version>
+    <flyway-core.version>9.22.2</flyway-core.version>
+    <java.version>17</java.version>
+    <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+    <lombok.version>1.18.24</lombok.version>
+    <mapstruct.version>1.5.5.Final</mapstruct.version>
+    <postgresql.version>42.5.4</postgresql.version>
+    <rest.starter.version>0.0.1-SNAPSHOT</rest.starter.version>
+    <audit.starter.version>0.0.1-SNAPSHOT</audit.starter.version>
+    <event.starter.version>0.0.1-SNAPSHOT</event.starter.version>
+    <jackson.databind.version>2.10.0</jackson.databind.version>
+  </properties>
+
+  <version>0.0.1-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
@@ -32,12 +44,6 @@
     <dependency>
       <artifactId>spring-boot-starter-logging</artifactId>
       <groupId>org.springframework.boot</groupId>
-    </dependency>
-    <dependency>
-      <artifactId>spring-boot-devtools</artifactId>
-      <groupId>org.springframework.boot</groupId>
-      <optional>true</optional>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -110,34 +116,37 @@
       <version>${postgresql.version}</version>
     </dependency>
     <dependency>
-      <artifactId>warehouse-rest-starter</artifactId>
       <groupId>warehouse.com</groupId>
+      <artifactId>warehouse-rest-starter</artifactId>
       <version>${rest.starter.version}</version>
     </dependency>
+    <dependency>
+      <groupId>warehouse.com</groupId>
+      <artifactId>warehouse-audit-starter</artifactId>
+      <version>${audit.starter.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>warehouse.com</groupId>
+      <artifactId>warehouse-event-starter</artifactId>
+      <version>${event.starter.version}</version>
+    </dependency>
   </dependencies>
-  <description>product-management-service</description>
-  <groupId>warehouse.com</groupId>
-  <modelVersion>4.0.0</modelVersion>
-  <name>product-management-service</name>
 
-  <parent>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <groupId>org.springframework.boot</groupId>
-    <relativePath/>
-    <version>3.1.4</version> <!-- lookup parent from repository -->
-  </parent>
-
-  <properties>
-    <apache.commons-collections4.version>4.4</apache.commons-collections4.version>
-    <flyway-core.version>9.22.2</flyway-core.version>
-    <java.version>17</java.version>
-    <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
-    <lombok.version>1.18.24</lombok.version>
-    <mapstruct.version>1.5.5.Final</mapstruct.version>
-    <postgresql.version>42.5.4</postgresql.version>
-    <rest.starter.version>0.0.1-SNAPSHOT</rest.starter.version>
-  </properties>
-
-  <version>0.0.1-SNAPSHOT</version>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>
+              <artifactId>lombok</artifactId>
+              <groupId>org.projectlombok</groupId>
+            </exclude>
+          </excludes>
+        </configuration>
+        <groupId>org.springframework.boot</groupId>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
