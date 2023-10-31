@@ -2,6 +2,9 @@ package warehouse.com.productmanagementservice.service.impl;
 
 
 import static net.logstash.logback.argument.StructuredArguments.keyValue;
+import static warehouse.com.audit.starter.common.Constants.CREATED;
+import static warehouse.com.audit.starter.common.Constants.DELETED;
+import static warehouse.com.audit.starter.common.Constants.UPDATED;
 import static warehouse.com.productmanagementservice.common.Constants.Logging.ID;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_EXISTS;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_NOT_FOUND;
@@ -16,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import warehouse.com.audit.starter.service.AuditService;
 import warehouse.com.productmanagementservice.mapper.ProductGroupMapper;
 import warehouse.com.productmanagementservice.model.dto.request.CreateProductGroupDto;
 import warehouse.com.productmanagementservice.model.entity.Product;
@@ -35,6 +39,7 @@ public class ProductGroupServiceImpl implements ProductGroupService {
   private final ProductGroupRepository productGroupRepository;
   private final ProductGroupMapper productGroupMapper;
   private final ProductRepository productRepository;
+  private final AuditService auditService;
 
   @Override
   public ProductGroup create(CreateProductGroupDto requestDto) {
@@ -50,7 +55,12 @@ public class ProductGroupServiceImpl implements ProductGroupService {
     updateRelationBetweenProductAndProductGroup(products, productGroup);
 
     log.debug("Creating product group with {}", keyValue(PRODUCT_GROUP_NAME, productGroupName));
-    return productGroupRepository.save(productGroup);
+    var savedProductGroup = productGroupRepository.save(productGroup);
+
+    auditService.sendAuditEvent(savedProductGroup, CREATED, "Vlad",
+        "Product Group successfully created");
+
+    return savedProductGroup;
   }
 
   @Override
@@ -60,6 +70,9 @@ public class ProductGroupServiceImpl implements ProductGroupService {
     log.debug("Updating product group with {}",
         keyValue(PRODUCT_GROUP_NAME, updatedProductGroup.getProductGroupName()));
     productGroupRepository.save(updatedProductGroup);
+
+    auditService.sendAuditEvent(updatedProductGroup, UPDATED, "Vlad",
+        "Product Group successfully updated");
 
     return updatedProductGroup;
   }
@@ -79,7 +92,11 @@ public class ProductGroupServiceImpl implements ProductGroupService {
   @Override
   public void deleteById(Long id) {
     log.debug("Deleting product group with {}", keyValue(ID, id));
-    productGroupRepository.deleteById(id);
+    var productToDelete = findById(id);
+    productGroupRepository.delete(productToDelete);
+
+    auditService.sendAuditEvent(productToDelete, DELETED, "Vlad",
+        "Product Group successfully deleted");
   }
 
   private ProductGroup updateProductGroup(ProductGroup productGroupToUpdate,

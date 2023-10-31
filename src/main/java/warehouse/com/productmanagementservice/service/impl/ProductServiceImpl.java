@@ -2,6 +2,9 @@ package warehouse.com.productmanagementservice.service.impl;
 
 
 import static net.logstash.logback.argument.StructuredArguments.keyValue;
+import static warehouse.com.audit.starter.common.Constants.CREATED;
+import static warehouse.com.audit.starter.common.Constants.DELETED;
+import static warehouse.com.audit.starter.common.Constants.UPDATED;
 import static warehouse.com.productmanagementservice.common.Constants.Logging.ID;
 import static warehouse.com.productmanagementservice.common.Constants.Logging.NAME;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_EXISTS;
@@ -61,7 +64,10 @@ public class ProductServiceImpl implements ProductService {
   @Override
   public void deleteById(Long id) {
     log.debug("Deleting product with {}", keyValue(ID, id));
-    productRepository.deleteById(id);
+    var productToDelete = findById(id);
+    productRepository.delete(productToDelete);
+
+    auditService.sendAuditEvent(productToDelete, DELETED, "Vlad", "Product successfully deleted");
   }
 
   @Override
@@ -98,7 +104,7 @@ public class ProductServiceImpl implements ProductService {
     log.debug("Creating Product with {}", keyValue(NAME, product.getProductName()));
     var savedProduct = productRepository.save(product);
 
-    auditService.sendAuditEvent(savedProduct, "prod", "testInit", "desc");
+    auditService.sendAuditEvent(savedProduct, CREATED, "Vlad", "Product successfully created");
 
     return savedProduct;
   }
@@ -112,7 +118,12 @@ public class ProductServiceImpl implements ProductService {
     var updatedProduct = updateProduct(productToUpdate, productDto);
 
     log.debug("Updating product with {}", keyValue(NAME, updatedProduct.getProductName()));
-    return productRepository.save(updatedProduct);
+
+    productRepository.save(updatedProduct);
+
+    auditService.sendAuditEvent(updatedProduct, UPDATED, "Vlad", "Product successfully updated");
+
+    return updatedProduct;
   }
 
   private void validateCreateRequest(ProductDto requestDto) {

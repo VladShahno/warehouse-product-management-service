@@ -1,6 +1,9 @@
 package warehouse.com.productmanagementservice.service.impl;
 
 import static net.logstash.logback.argument.StructuredArguments.keyValue;
+import static warehouse.com.audit.starter.common.Constants.CREATED;
+import static warehouse.com.audit.starter.common.Constants.DELETED;
+import static warehouse.com.audit.starter.common.Constants.UPDATED;
 import static warehouse.com.productmanagementservice.common.Constants.Logging.ID;
 import static warehouse.com.productmanagementservice.common.Constants.Logging.NAME;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_NOT_FOUND;
@@ -12,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import warehouse.com.audit.starter.service.AuditService;
 import warehouse.com.productmanagementservice.mapper.WarehouseMapper;
 import warehouse.com.productmanagementservice.model.dto.request.WarehouseDto;
 import warehouse.com.productmanagementservice.model.entity.Warehouse;
@@ -27,13 +31,18 @@ public class WarehouseServiceImpl implements WarehouseService {
 
   private final WarehouseRepository warehouseRepository;
   private final WarehouseMapper warehouseMapper;
+  private final AuditService auditService;
 
   @Override
   public Warehouse create(WarehouseDto warehouseDto) {
     var warehouse = warehouseMapper.toEntity(warehouseDto);
 
     log.debug("Creating warehouse with {}", keyValue(NAME, warehouseDto.warehouseName()));
-    return warehouseRepository.save(warehouse);
+    var savedWarehouse = warehouseRepository.save(warehouse);
+
+    auditService.sendAuditEvent(savedWarehouse, CREATED, "Vlad", "Warehouse successfully created");
+
+    return savedWarehouse;
   }
 
   @Override
@@ -42,7 +51,11 @@ public class WarehouseServiceImpl implements WarehouseService {
     warehouse.setWarehouseName(warehouseDto.warehouseName());
 
     log.debug("Updating warehouse with {}", keyValue(NAME, warehouseDto.warehouseName()));
-    return warehouseRepository.save(warehouse);
+    warehouseRepository.save(warehouse);
+
+    auditService.sendAuditEvent(warehouse, UPDATED, "Vlad", "Warehouse successfully updated");
+
+    return warehouse;
   }
 
   @Override
@@ -60,6 +73,10 @@ public class WarehouseServiceImpl implements WarehouseService {
   @Override
   public void deleteById(Long id) {
     log.debug("Deleting warehouse with {}", keyValue(ID, id));
+    var warehouseToDelete = findById(id);
+
+    auditService.sendAuditEvent(warehouseToDelete, DELETED, "Vlad", "Warehouse successfully delete");
+
     warehouseRepository.deleteById(id);
   }
 }

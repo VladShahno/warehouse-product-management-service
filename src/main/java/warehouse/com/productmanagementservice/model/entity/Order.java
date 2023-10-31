@@ -1,5 +1,8 @@
 package warehouse.com.productmanagementservice.model.entity;
 
+import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ORDER;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -26,6 +29,10 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import warehouse.com.audit.starter.annotation.AuditableEntity;
+import warehouse.com.audit.starter.annotation.AuditableId;
+import warehouse.com.audit.starter.annotation.AuditableName;
+import warehouse.com.audit.starter.annotation.AuditableType;
 import warehouse.com.productmanagementservice.model.order.OrderStatus;
 
 @Getter
@@ -37,16 +44,19 @@ import warehouse.com.productmanagementservice.model.order.OrderStatus;
 @JsonIgnoreProperties(value = {"created", "updated"}, allowGetters = true)
 @Entity
 @Table(name = "orders")
+@AuditableEntity
 public class Order implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @AuditableId
   private Long id;
 
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
   private List<OrderItem> orderItems = new ArrayList<>();
 
   @Enumerated(EnumType.STRING)
+  @AuditableName
   private OrderStatus status;
 
   @Temporal(TemporalType.TIMESTAMP)
@@ -58,4 +68,10 @@ public class Order implements Serializable {
   @Column(name = "updated")
   @LastModifiedDate
   private Date updated;
+
+  @AuditableType
+  @JsonIgnore
+  public String getAuditableType() {
+    return ORDER;
+  }
 }

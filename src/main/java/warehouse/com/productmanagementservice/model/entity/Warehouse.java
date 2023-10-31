@@ -1,5 +1,8 @@
 package warehouse.com.productmanagementservice.model.entity;
 
+import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.WAREHOUSE;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,6 +24,10 @@ import org.hibernate.Hibernate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import warehouse.com.audit.starter.annotation.AuditableEntity;
+import warehouse.com.audit.starter.annotation.AuditableId;
+import warehouse.com.audit.starter.annotation.AuditableName;
+import warehouse.com.audit.starter.annotation.AuditableType;
 
 @Getter
 @Setter
@@ -30,14 +37,17 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @JsonIgnoreProperties(value = {"created", "updated"}, allowGetters = true)
 @Entity
 @Table(name = "warehouse")
+@AuditableEntity
 public class Warehouse implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", nullable = false)
+  @AuditableId
   private Long id;
 
   @Column(name = "warehouse_name", unique = true, nullable = false)
+  @AuditableName
   private String warehouseName;
 
   @Temporal(TemporalType.TIMESTAMP)
@@ -65,5 +75,11 @@ public class Warehouse implements Serializable {
   @Override
   public int hashCode() {
     return id != null ? id.hashCode() : super.hashCode();
+  }
+
+  @AuditableType
+  @JsonIgnore
+  public String getAuditableType() {
+    return WAREHOUSE;
   }
 }

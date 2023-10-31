@@ -1,6 +1,8 @@
 package warehouse.com.productmanagementservice.service.impl;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
+import static warehouse.com.audit.starter.common.Constants.CREATED;
+import static warehouse.com.audit.starter.common.Constants.UPDATED;
 import static warehouse.com.productmanagementservice.common.Constants.Logging.ID;
 import static warehouse.com.productmanagementservice.common.Constants.Logging.ORDER_STATUS;
 import static warehouse.com.productmanagementservice.common.Constants.ProductManagementValidation.ENTITY_NOT_FOUND;
@@ -26,6 +28,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import warehouse.com.audit.starter.service.AuditService;
 import warehouse.com.productmanagementservice.exception.InsufficientStockException;
 import warehouse.com.productmanagementservice.exception.NotUpdatableOrderException;
 import warehouse.com.productmanagementservice.mapper.OrderItemMapper;
@@ -50,6 +53,7 @@ public class OrderServiceImpl implements OrderService {
   private final ProductStockService productStockService;
   private final ProductStockRepository productStockRepository;
   private final OrderItemMapper orderItemMapper;
+  private final AuditService auditService;
 
   @Override
   public Order createOrder(List<OrderItemDto> orderItemDtos) {
@@ -98,6 +102,8 @@ public class OrderServiceImpl implements OrderService {
 
     orderItems.forEach(orderItem -> orderItem.setOrder(order));
     var savedOrder = orderRepository.save(order);
+
+    auditService.sendAuditEvent(savedOrder, CREATED, "Vlad", "Order successfully created");
 
     log.info("Creating Order with {}", kv(ID, savedOrder.getId()));
     return savedOrder;
@@ -178,6 +184,8 @@ public class OrderServiceImpl implements OrderService {
     }
     orderToUpdate.setStatus(orderStatus);
     orderRepository.save(orderToUpdate);
+
+    auditService.sendAuditEvent(orderToUpdate, UPDATED, "Vlad", "Order successfully updated");
 
     log.info("Updating Order with {} to {}", kv(ID, orderToUpdate.getId()),
         kv(ORDER_STATUS, orderStatus));
